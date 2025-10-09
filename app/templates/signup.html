@@ -8,6 +8,7 @@
 	<!--favicon-->
 	<link rel="icon" href="{{ url_for('static', filename='images/favicon-32x32.png') }}" type="image/png" />
 	<!--plugins-->
+	<link rel="stylesheet" href="{{ url_for('static', filename='plugins/notifications/css/lobibox.min.css') }}" />
 	<link href="{{ url_for('static', filename='plugins/simplebar/css/simplebar.css') }}" rel="stylesheet" />
 	<link href="{{ url_for('static', filename='plugins/perfect-scrollbar/css/perfect-scrollbar.css') }}"
 		rel="stylesheet" />
@@ -54,7 +55,7 @@
 										<hr />
 									</div> -->
 									<div class="form-body">
-										<form class="row g-3">
+										<form class="row g-3" action="javascript:;">
 											<!-- <div class="col-sm-6">
 												<label for="inputFirstName" class="form-label">First Name</label>
 												<input type="email" class="form-control" id="inputFirstName"
@@ -99,7 +100,7 @@
 											</div>
 											<div class="col-12">
 												<div class="d-grid">
-													<button type="submit" class="btn btn-primary"><i
+													<button type="submit" id="do-signup" class="btn btn-primary"><i
 															class='bx bx-user'></i>注 册</button>
 												</div>
 											</div>
@@ -137,10 +138,42 @@
 					$('#show_hide_password i').addClass("bx-show");
 				}
 			});
+
+			$("#do-signup").on('click', function (event) {
+				if (!$("#flexSwitchCheckChecked").prop("checked")) {
+					round_warning_noti("请同意条款和条件");
+					return false;
+				}
+				let username = $("#inputUsername").val();
+				let password = $("#inputPassword").val();
+				$.ajax({
+					url: "/api/signup",
+					method: "POST",
+					contentType: "application/json",   // ✅ 告诉服务器内容是 JSON
+					dataType: "json",
+					data: JSON.stringify({             // ✅ 转换为 JSON 字符串
+						username: username,
+						password: password
+					}),
+					success: function (res) {
+						if (res.code === 200) {
+							round_success_noti(res.msg);
+						} else {
+							round_error_noti(res.msg);
+						}
+					},
+					error: function (xhr) {
+						console.error(xhr.responseText);
+					}
+				});
+			})
 		});
 	</script>
 	<!--app JS-->
 	<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+	<!--notification js -->
+	<script src="{{ url_for('static', filename='plugins/notifications/js/notifications.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='plugins/notifications/js/notification-custom-script.js') }}"></script>
 </body>
 
 </html>
