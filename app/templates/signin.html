@@ -8,6 +8,7 @@
 	<!--favicon-->
 	<link rel="icon" href="{{ url_for('static', filename='images/favicon-32x32.png') }}" type="image/png" />
 	<!--plugins-->
+	<link rel="stylesheet" href="{{ url_for('static', filename='plugins/notifications/css/lobibox.min.css') }}" />
 	<link href="{{ url_for('static', filename='plugins/simplebar/css/simplebar.css') }}" rel="stylesheet" />
 	<link href="{{ url_for('static', filename='plugins/perfect-scrollbar/css/perfect-scrollbar.css') }}"
 		rel="stylesheet" />
@@ -55,10 +56,10 @@
 										<hr />
 									</div> -->
 									<div class="form-body">
-										<form class="row g-3">
+										<form class="row g-3" action="javascript:;">
 											<div class="col-12">
 												<label for="inputUsername" class="form-label">账 号</label>
-												<input type="email" class="form-control" id="inputUsername"
+												<input type="text" class="form-control" id="inputUsername"
 													placeholder="请输入账号">
 											</div>
 											<div class="col-12">
@@ -73,17 +74,15 @@
 											<div class="col-md-6">
 												<div class="form-check form-switch">
 													<input class="form-check-input" type="checkbox"
-														id="flexSwitchCheckChecked" checked>
-													<label class="form-check-label"
-														for="flexSwitchCheckChecked">记住密码</label>
+														id="rememberPassword">
+													<label class="form-check-label" for="rememberPassword">记住密码</label>
 												</div>
 											</div>
-											<div class="col-md-6 text-end"> <a
-													href="/forgot_password">忘记密码？</a>
+											<div class="col-md-6 text-end"> <a href="/forgot_password">忘记密码？</a>
 											</div>
 											<div class="col-12">
 												<div class="d-grid">
-													<button type="submit" class="btn btn-primary"><i
+													<button type="submit" id="do-signin" class="btn btn-primary"><i
 															class="bx bxs-lock-open"></i>登 录</button>
 												</div>
 											</div>
@@ -121,10 +120,57 @@
 					$('#show_hide_password i').addClass("bx-show");
 				}
 			});
+
+			$('#rememberPassword').click(function () {
+				if ($(this).is(':checked')) {
+					localStorage.setItem("rememberPassword", true);
+				} else {
+					localStorage.removeItem("rememberPassword");
+				}
+			});
+
+			if (localStorage.getItem("rememberPassword")) {
+				$('#rememberPassword').prop("checked", true);
+				$("#inputUsername").val(localStorage.getItem("username"));
+				$("#inputPassword").val(localStorage.getItem("password"));
+			}
+
+			$("#do-signin").on("click", function (event) {
+				let username = $("#inputUsername").val();
+				let password = $("#inputPassword").val();
+				apiRequest("/api/signin", {
+					username: username,
+					password: password
+				})
+					.then(res => {
+						if (res.code === 200) {
+
+							localStorage.setItem("userid", res.data.id);
+							localStorage.setItem("username", res.data.username);
+							localStorage.setItem("password", password);
+							localStorage.setItem("usertoken", res.data.access_token);
+
+							round_success_noti(res.msg);
+							// 延迟2秒跳转首页
+							setTimeout(function () {
+								window.location.href = '/';
+							}, 1500);
+
+						} else {
+							round_error_noti(res.msg);
+						}
+					})
+					.catch(err => console.error("失败:", err));
+			});
 		});
 	</script>
 	<!--app JS-->
+	<script src="{{ url_for('static', filename='js/ajax.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+	<!--notification js -->
+	<script src="{{ url_for('static', filename='plugins/notifications/js/lobibox.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='plugins/notifications/js/notifications.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='plugins/notifications/js/notification-custom-script.js') }}"></script>
 </body>
 
 </html>

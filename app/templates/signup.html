@@ -146,32 +146,26 @@
 				}
 				let username = $("#inputUsername").val();
 				let password = $("#inputPassword").val();
-				$.ajax({
-					url: "/api/signup",
-					method: "POST",
-					contentType: "application/json",   // ✅ 告诉服务器内容是 JSON
-					dataType: "json",
-					data: JSON.stringify({             // ✅ 转换为 JSON 字符串
-						username: username,
-						password: password
-					}),
-					success: function (res) {
+				apiRequest("/api/signup", {
+					username: username,
+					password: password
+				})
+					.then(res => {
 						if (res.code === 200) {
 							round_success_noti(res.msg);
 						} else {
 							round_error_noti(res.msg);
 						}
-					},
-					error: function (xhr) {
-						console.error(xhr.responseText);
-					}
-				});
+					})
+					.catch(err => console.error("失败:", err));
 			})
 		});
 	</script>
 	<!--app JS-->
+	<script src="{{ url_for('static', filename='js/ajax.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 	<!--notification js -->
+	<script src="{{ url_for('static', filename='plugins/notifications/js/lobibox.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='plugins/notifications/js/notifications.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='plugins/notifications/js/notification-custom-script.js') }}"></script>
 </body>

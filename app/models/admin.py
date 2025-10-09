@@ -1,6 +1,8 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from app.utils import format_datetime
 from .. import db
 
 
@@ -9,6 +11,7 @@ class Admins(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    access_token = db.Column(db.String(255), nullable=False)
     created_at = db.Column(
         db.DateTime,
         default=lambda: datetime.now(ZoneInfo("Asia/Tokyo")),
@@ -31,9 +34,10 @@ class Admins(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "username": self.nickname,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
+            "username": self.username,
+            "access_token": self.access_token,
+            "created_at": format_datetime(self.created_at),
+            "updated_at": format_datetime(self.updated_at),
         }
 
     def __repr__(self):
